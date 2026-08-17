@@ -9,7 +9,12 @@
     "node": ">=20"
   },
   "scripts": {
+    "test": "node mcp/selftest.mjs",
     "extract": "node pipeline/extract.mjs",
-    "extract:fixtures": "node pipeline/extract.mjs --repo fixtures/sample-study-repo --out content.json"
+    "extract:fixtures": "node pipeline/extract.mjs --repo fixtures/sample-study-repo --out content.json",
+    "mcp": "node mcp/index.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0"
   }
 }

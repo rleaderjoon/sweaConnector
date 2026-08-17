@@ -1,0 +1,22 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: 공개 저장소 유출 검사
+        run: node pipeline/guard-public.mjs
+      - name: 자체 검증
+        run: npm test
+      - name: fixtures 추출
+        run: npm run extract:fixtures

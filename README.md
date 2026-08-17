@@ -40,16 +40,34 @@ Claude가 당신의 학습 저장소를 직접 읽고 씁니다 — 다음에 �
 ```bash
 git clone https://github.com/rleaderjoon/sweaConnector
 cd sweaConnector
+npm install
+npm test                              # 13개 자체 검증 (MCP 핸드셰이크 포함)
 
 # 1. 내 저장소가 규약에 맞는지 확인
 node pipeline/extract.mjs --repo /path/to/my-study-repo --out content.json
 
-# 2. Claude 에 붙이기
+# 2. 일정 설정 — 내 학습 저장소 루트에 .sweaconnector.json
+echo '{"startDate":"2026-08-15","examDate":"2026-09-19"}' > /path/to/my-study-repo/.sweaconnector.json
+
+# 3. Claude 에 붙이기
 claude mcp add swea -- node ./mcp/index.mjs --repo /path/to/my-study-repo
 
-# 3. 내 APK 굽기
+# 4. 내 APK 굽기
 ./gradlew -p app assembleRelease      # 또는 GitHub Actions 에 맡기기
 ```
+
+## MCP 툴
+
+| 툴 | 하는 일 |
+|---|---|
+| `list_problems` | 문제 목록 — status / week / type / topic / query 로 걸러서 |
+| `get_problem` | 문제 하나의 노트 전문 + 풀이 코드 |
+| `record_progress` | NOTES.md 프론트매터에 상태·시도횟수·소요시간 기록 (본문 불변) |
+| `append_note` | 특정 섹션 끝에 내용 덧붙이기 |
+| `schedule_status` | 계획 대비 실제 + 남은 문제 재배치안 |
+
+`schedule_status` 는 계획서를 읽어 주는 도구가 아니라 **계획이 이미 어긋났다는 전제로 고쳐 주는 도구**입니다.
+`slackDays` 를 먼저 보세요 — 응시일까지 남은 여유 일수이고, 음수면 페이스를 올려야 합니다.
 
 ## 요구 사항
 
