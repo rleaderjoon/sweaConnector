@@ -52,9 +52,30 @@ echo '{"startDate":"2026-08-15","examDate":"2026-09-19"}' > /path/to/my-study-re
 # 3. Claude 에 붙이기
 claude mcp add swea -- node ./mcp/index.mjs --repo /path/to/my-study-repo
 
-# 4. 내 APK 굽기
-./gradlew -p app assembleRelease      # 또는 GitHub Actions 에 맡기기
+# 4. 내 APK 굽기 — 콘텐츠 추출부터 서명까지 한 번에
+bash pipeline/build-apk.sh /path/to/my-study-repo release
 ```
+
+APK 는 `app/reader/build/outputs/apk/release/` 에 나옵니다. GitHub Actions 에 맡기려면
+`.github/workflows/apk.yml` 을 수동 실행하세요 (공개 저장소이므로 데모 콘텐츠로 굽습니다).
+
+### 폰에 설치하기
+
+1. APK 를 자기 private 저장소의 Release 에 올린다 — `gh release create v0.1.0 <apk> -R <owner>/<repo>`
+2. 폰 브라우저에서 그 Release 를 열어 APK 를 내려받는다 (GitHub 로그인 상태여야 한다)
+3. "출처를 알 수 없는 앱" 설치를 브라우저에 한 번 허용한다
+
+공개 저장소에 자기 APK 를 올리지 마세요 — APK 안에 문제와 풀이가 들어 있습니다.
+
+### 화면
+
+| 상태 | 폭 | 배치 |
+|---|---|---|
+| 접음 (커버) | ~344dp | 한 페이지 — 목록, 누르면 본문으로 교체 |
+| 펼침 세로 | 673~790dp | 책 펼친 면 — 좌 목차 / 우 본문 |
+| 펼침 가로 | ~930dp | 같은 2단, 본문이 더 넓다 |
+
+접었다 펼치면 읽던 위치가 유지됩니다 (`configChanges` 로 액티비티가 재생성되지 않습니다).
 
 ## MCP 툴
 

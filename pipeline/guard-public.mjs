@@ -8,8 +8,19 @@ import { readFile } from 'node:fs/promises'
 const ALLOWED_IDS = new Set(['1001', '2001']) // fixtures 의 가상 문제
 const KEY_RE = /w\d+d\d+_(\d+)_/g
 
+// 파일 자체가 추적되면 안 되는 것들. .gitignore 의 경로가 어긋나도 여기서 잡힌다.
+const FORBIDDEN = [/(^|\/)content\.json$/, /\.(apk|aab|keystore)$/]
+
 const tracked = execFileSync('git', ['ls-files'], { encoding: 'utf8' }).trim().split('\n')
 const leaks = []
+
+const forbidden = tracked.filter(f => FORBIDDEN.some(re => re.test(f)))
+if (forbidden.length) {
+  console.error('추적되면 안 되는 파일이 있습니다 (각자의 문제·풀이가 들어 있습니다):')
+  for (const f of forbidden) console.error(`  ${f}`)
+  console.error('\n.gitignore 를 고치고 `git rm --cached <파일>` 하세요.')
+  process.exit(1)
+}
 
 for (const file of tracked) {
   let text

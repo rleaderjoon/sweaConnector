@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 250" width="460" height="250">
+  <g fill="none" stroke="#1a1a1a" stroke-width="1.4">
+    <!-- before: 한 줄로 늘어진 트리 -->
+    <line x1="80" y1="46" x2="80" y2="74"/>
+    <line x1="80" y1="106" x2="80" y2="134"/>
+    <line x1="80" y1="166" x2="80" y2="194"/>
+    <circle cx="80" cy="30" r="16"/>
+    <circle cx="80" cy="90" r="16"/>
+    <circle cx="80" cy="150" r="16"/>
+    <circle cx="80" cy="210" r="16"/>
+
+    <!-- after: 루트에 직결된 별 모양 -->
+    <line x1="356" y1="44" x2="316" y2="194"/>
+    <line x1="360" y1="46" x2="360" y2="194"/>
+    <line x1="364" y1="44" x2="404" y2="194"/>
+    <circle cx="360" cy="30" r="16"/>
+    <circle cx="316" cy="210" r="16"/>
+    <circle cx="360" cy="210" r="16"/>
+    <circle cx="404" cy="210" r="16"/>
+  </g>
+
+  <!-- 변환 화살표 -->
+  <g stroke="#1a1a1a" stroke-width="1.4" fill="none">
+    <line x1="150" y1="120" x2="240" y2="120"/>
+    <polyline points="232,114 240,120 232,126"/>
+  </g>
+
+  <g font-family="sans-serif" font-size="15" fill="#1a1a1a" text-anchor="middle">
+    <text x="80" y="35">1</text>
+    <text x="80" y="95">2</text>
+    <text x="80" y="155">3</text>
+    <text x="80" y="215">4</text>
+    <text x="360" y="35">1</text>
+    <text x="316" y="215">2</text>
+    <text x="360" y="215">3</text>
+    <text x="404" y="215">4</text>
+  </g>
+
+  <g font-family="sans-serif" font-size="13" fill="#8a8a8a" text-anchor="middle">
+    <text x="195" y="110">find(4)</text>
+    <text x="80" y="245">깊이 4 · 다음 find 도 4번</text>
+    <text x="360" y="245">깊이 2 · 이후 전부 O(1)</text>
+  </g>
+</svg>

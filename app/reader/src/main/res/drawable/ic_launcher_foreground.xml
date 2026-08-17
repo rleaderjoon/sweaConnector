@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 굵기가 다른 세 줄 — 목록과 위계. 디자인 방향(회색조 위계)과 같은 모티프. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#111111"
+        android:pathData="M32,42 h44 v5 h-44 z" />
+    <path
+        android:fillColor="#111111"
+        android:pathData="M32,53 h30 v5 h-30 z" />
+    <path
+        android:fillColor="#111111"
+        android:pathData="M32,64 h18 v5 h-18 z" />
+</vector>

@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 230" width="460" height="230">
+  <!-- 위: 매번 계산하는 방식 -->
+  <g stroke="#1a1a1a" stroke-width="1.4" fill="none">
+    <line x1="40" y1="60" x2="420" y2="60"/>
+  </g>
+  <g stroke="#1a1a1a" stroke-width="1.4">
+    <line x1="60" y1="40" x2="60" y2="60"/><line x1="90" y1="40" x2="90" y2="60"/>
+    <line x1="120" y1="40" x2="120" y2="60"/><line x1="150" y1="40" x2="150" y2="60"/>
+    <line x1="180" y1="40" x2="180" y2="60"/><line x1="210" y1="40" x2="210" y2="60"/>
+    <line x1="240" y1="40" x2="240" y2="60"/><line x1="270" y1="40" x2="270" y2="60"/>
+    <line x1="300" y1="40" x2="300" y2="60"/><line x1="330" y1="40" x2="330" y2="60"/>
+    <line x1="360" y1="40" x2="360" y2="60"/><line x1="390" y1="40" x2="390" y2="60"/>
+  </g>
+  <!-- 갱신마다 계산 비용이 붙는다 -->
+  <g fill="#1a1a1a">
+    <rect x="56" y="62" width="8" height="26"/><rect x="86" y="62" width="8" height="26"/>
+    <rect x="116" y="62" width="8" height="26"/><rect x="146" y="62" width="8" height="26"/>
+    <rect x="176" y="62" width="8" height="26"/><rect x="206" y="62" width="8" height="26"/>
+    <rect x="236" y="62" width="8" height="26"/><rect x="266" y="62" width="8" height="26"/>
+    <rect x="296" y="62" width="8" height="26"/><rect x="326" y="62" width="8" height="26"/>
+    <rect x="356" y="62" width="8" height="26"/><rect x="386" y="62" width="8" height="26"/>
+  </g>
+
+  <!-- 아래: 기록만 하고 쿼리에서 몰아 계산 -->
+  <g stroke="#1a1a1a" stroke-width="1.4" fill="none">
+    <line x1="40" y1="170" x2="420" y2="170"/>
+  </g>
+  <g stroke="#c8c8c8" stroke-width="1.4">
+    <line x1="60" y1="150" x2="60" y2="170"/><line x1="90" y1="150" x2="90" y2="170"/>
+    <line x1="120" y1="150" x2="120" y2="170"/><line x1="150" y1="150" x2="150" y2="170"/>
+    <line x1="180" y1="150" x2="180" y2="170"/><line x1="240" y1="150" x2="240" y2="170"/>
+    <line x1="270" y1="150" x2="270" y2="170"/><line x1="300" y1="150" x2="300" y2="170"/>
+    <line x1="330" y1="150" x2="330" y2="170"/><line x1="390" y1="150" x2="390" y2="170"/>
+  </g>
+  <!-- 쿼리 지점에서만 계산 -->
+  <g stroke="#1a1a1a" stroke-width="1.4">
+    <line x1="210" y1="150" x2="210" y2="170"/><line x1="360" y1="150" x2="360" y2="170"/>
+  </g>
+  <g fill="#1a1a1a">
+    <rect x="206" y="172" width="8" height="26"/><rect x="356" y="172" width="8" height="26"/>
+  </g>
+
+  <g font-family="sans-serif" font-size="13" fill="#8a8a8a">
+    <text x="40" y="28">갱신마다 계산</text>
+    <text x="40" y="138">기록만 하고, 쿼리에서 몰아 계산</text>
+  </g>
+  <g font-family="sans-serif" font-size="12" fill="#8a8a8a" text-anchor="middle">
+    <text x="230" y="110">계산 12회</text>
+    <text x="230" y="220">계산 2회 — 갱신 10회는 리스트 수정뿐</text>
+  </g>
+</svg>
