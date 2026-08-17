@@ -1,0 +1,22 @@
+# 빌드 산출물
+node_modules/
+content.json
+app/build/
+app/.gradle/
+build/
+.gradle/
+local.properties
+*.apk
+*.aab
+*.keystore
+
+# 생성된 앱 리소스 (파이프라인이 만든다)
+app/src/main/assets/content.json
+app/src/main/res/drawable/diagram_*.xml
+
+# IDE / OS
+.idea/
+.metadata/
+*.iml
+.DS_Store
+Thumbs.db
