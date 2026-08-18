@@ -11,7 +11,8 @@ VARIANT="${1:-release}"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 : "${ANDROID_HOME:=$HOME/Android/sdk}"
-: "${GRADLE:=gradle}"
+# wrapper 를 먼저 본다 — gradle 을 따로 깔지 않아도 되고, 버전이 사람마다 갈리지 않는다.
+: "${GRADLE:=$ROOT/app/gradlew}"
 export ANDROID_HOME
 export ANDROID_SDK_ROOT="$ANDROID_HOME"
 
