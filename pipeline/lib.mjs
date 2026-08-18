@@ -93,10 +93,12 @@ export function splitFrontmatter(text) {
 /** 프론트매터를 직렬화해 본문 앞에 붙인다. 기존 블록은 교체. */
 export function withFrontmatter(text, data) {
   const { body } = splitFrontmatter(text)
+  // 본문의 줄바꿈을 따라간다. 섞어 두면 편집기가 한 번 저장하는 순간 파일 전체가 diff 로 뜬다.
+  const eol = body.includes('\r\n') ? '\r\n' : '\n'
   const lines = Object.entries(data)
     .filter(([, v]) => v !== null && v !== undefined && !(Array.isArray(v) && v.length === 0))
     .map(([k, v]) => `${k}: ${Array.isArray(v) ? `[${v.join(', ')}]` : v}`)
-  return `---\n${lines.join('\n')}\n---\n\n${body.replace(/^\n+/, '')}`
+  return ['---', ...lines, '---', '', body.replace(/^[\r\n]+/, '')].join(eol)
 }
 
 export function problemDir(repo, key) {

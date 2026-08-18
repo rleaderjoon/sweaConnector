@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- 콘텐츠는 APK 안에 없다. 각자의 학습 저장소에서 받아 온다. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:label="algo reader"
         android:icon="@mipmap/ic_launcher"

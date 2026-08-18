@@ -18,5 +18,3 @@ jobs:
         run: node pipeline/guard-public.mjs
       - name: 자체 검증
         run: npm test
-      - name: fixtures 추출
-        run: npm run extract:fixtures

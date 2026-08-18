@@ -30,17 +30,17 @@ import androidx.compose.ui.unit.dp
  * 다 푼 것은 검고, 손댄 것은 굵고, 아직 안 푼 것은 연하다.
  */
 @Composable
-fun ContentsPane(content: Content, selectedKey: String?, onSelect: (String) -> Unit) {
-    val byKey = content.problems.associateBy { it.key }
+fun ContentsPane(index: Index, selectedKey: String?, onSelect: (String) -> Unit) {
+    val byKey = index.problems.associateBy { it.key }
 
     LazyColumn(Modifier.fillMaxSize()) {
         item {
             Column(Modifier.padding(horizontal = Space.page)) {
                 Spacer(Modifier.height(8.dp))
-                Text("${content.problems.count { it.status == "solved" }} / ${content.problems.size}", style = Type.Ghost)
+                Text("${index.problems.count { it.status == "solved" }} / ${index.problems.size}", style = Type.Ghost)
                 Spacer(Modifier.height(4.dp))
                 Text("풀이 아카이브", style = Type.Title)
-                content.config.examDate?.let {
+                index.config.examDate?.let {
                     Spacer(Modifier.height(7.dp))
                     Text("응시 $it", style = Type.Meta)
                 }
@@ -48,7 +48,7 @@ fun ContentsPane(content: Content, selectedKey: String?, onSelect: (String) -> U
             }
         }
 
-        for (week in content.weeks) {
+        for (week in index.weeks) {
             item(key = "w${week.week}") {
                 Column {
                     Text(
@@ -70,7 +70,7 @@ fun ContentsPane(content: Content, selectedKey: String?, onSelect: (String) -> U
 }
 
 @Composable
-private fun ProblemRow(p: Problem, selected: Boolean, onClick: () -> Unit) {
+private fun ProblemRow(p: ProblemMeta, selected: Boolean, onClick: () -> Unit) {
     // 상태가 그대로 굵기와 명도가 된다
     val color = when (p.status) {
         "solved" -> Ink.Strong
@@ -117,7 +117,7 @@ private fun ProblemRow(p: Problem, selected: Boolean, onClick: () -> Unit) {
 // ─────────────────────────────────────────────── 문제 상세
 
 @Composable
-fun ProblemPane(p: Problem, diagrams: Map<String, Diagram>) {
+fun ProblemPane(p: ProblemMeta, body: ProblemBody?, diagrams: Map<String, Diagram>) {
     Column(
         Modifier
             .fillMaxSize()
@@ -153,14 +153,18 @@ fun ProblemPane(p: Problem, diagrams: Map<String, Diagram>) {
             }
         }
 
-        for (s in p.sections) {
+        if (body == null) {
+            Text("본문을 아직 받지 못했습니다", style = Type.Body.copy(color = Ink.Faint))
+        }
+
+        for (s in body?.sections.orEmpty()) {
             Text(s.name.uppercase(), style = Type.Micro)
             Spacer(Modifier.height(11.dp))
             Blocks(s.blocks)
             Spacer(Modifier.height(Space.section - Space.block))
         }
 
-        p.solution?.let { sol ->
+        body?.solution?.let { sol ->
             Text("풀이  ·  ${sol.file}".uppercase(), style = Type.Micro)
             Spacer(Modifier.height(11.dp))
             Blocks(listOf(Block(t = "code", lang = sol.lang, text = sol.code)))
@@ -180,18 +184,18 @@ private fun statusLabel(status: String) = when (status) {
 // ─────────────────────────────────────────────── 개념 사전
 
 @Composable
-fun ConceptsPane(content: Content, selectedId: String?, onSelect: (String) -> Unit) {
+fun ConceptsPane(index: Index, selectedId: String?, onSelect: (String) -> Unit) {
     LazyColumn(Modifier.fillMaxSize()) {
         item {
             Column(Modifier.padding(horizontal = Space.page)) {
                 Spacer(Modifier.height(8.dp))
-                Text("${content.concepts.size}", style = Type.Ghost)
+                Text("${index.concepts.size}", style = Type.Ghost)
                 Spacer(Modifier.height(4.dp))
                 Text("개념 사전", style = Type.Title)
                 Spacer(Modifier.height(Space.section))
             }
         }
-        items(content.concepts, key = { it.id }) { c ->
+        items(index.concepts, key = { it.id }) { c ->
             Column(
                 Modifier
                     .fillMaxWidth()
@@ -212,7 +216,7 @@ fun ConceptsPane(content: Content, selectedId: String?, onSelect: (String) -> Un
 }
 
 @Composable
-fun ConceptPane(c: Concept, diagrams: Map<String, Diagram>) {
+fun ConceptPane(c: ConceptMeta, body: ConceptBody?, diagrams: Map<String, Diagram>) {
     Column(
         Modifier
             .fillMaxSize()
@@ -237,7 +241,7 @@ fun ConceptPane(c: Concept, diagrams: Map<String, Diagram>) {
             }
         }
 
-        Blocks(c.blocks)
+        Blocks(body?.blocks.orEmpty())
         Spacer(Modifier.height(60.dp))
     }
 }
@@ -254,7 +258,7 @@ fun EmptyPane(text: String) {
 // ─────────────────────────────────────────────── 상단 텍스트 탭
 
 @Composable
-fun TextTabs(tab: Tab, onTab: (Tab) -> Unit, back: (() -> Unit)?) {
+fun TextTabs(tab: Tab, onTab: (Tab) -> Unit, back: (() -> Unit)?, status: String, onStatus: () -> Unit) {
     Column {
         Row(
             Modifier.fillMaxWidth().padding(horizontal = Space.page, vertical = 15.dp),
@@ -275,9 +279,15 @@ fun TextTabs(tab: Tab, onTab: (Tab) -> Unit, back: (() -> Unit)?) {
                 Text(
                     "뒤로",
                     style = Type.Tab.copy(color = Ink.Muted, fontWeight = FontWeight.Medium),
-                    modifier = Modifier.clickable(onClick = back),
+                    modifier = Modifier.clickable(onClick = back).padding(end = 14.dp),
                 )
             }
+            // 갱신 상태가 곧 설정 입구다. 평소엔 "설정", 무언가 오갈 때만 그 사실을 말한다.
+            Text(
+                status,
+                style = Type.Meta.copy(color = Ink.Muted),
+                modifier = Modifier.clickable(onClick = onStatus),
+            )
         }
         Hairline()
     }

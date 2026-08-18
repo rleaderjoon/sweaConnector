@@ -1,17 +1,22 @@
 # sweaConnector
 
-**자기 알고리즘 학습 저장소를 Claude에 연결하고, 읽기 전용 안드로이드 뷰어로 굽는 도구.**
+**자기 알고리즘 학습 저장소를 Claude에 연결하고, 그 저장소를 그대로 읽는 안드로이드 뷰어.**
 
-Claude가 당신의 학습 저장소를 직접 읽고 씁니다 — 다음에 풀 문제를 골라 주고, 일정을 조정하고,
-풀이 노트를 기록합니다. 그 결과는 폴더블에 맞춘 전자책 형태의 앱으로 언제든 꺼내 볼 수 있습니다.
+Claude가 당신의 학습 저장소를 직접 읽고 씁니다 — 다음에 풀 문제를 골라 주고, 문제 폴더를 만들고,
+풀이를 짜 넣고, 약점을 짚고, 일정을 고칩니다. 그 결과는 폴더블에 맞춘 전자책 형태의 앱으로 언제든 꺼내 볼 수 있습니다.
 
 ```
-   ┌──────────────┐   MCP    ┌──────────────┐  빌드 시 주입  ┌──────────────┐
-   │  당신의 학습   │ ───────► │    Claude    │              │  안드로이드    │
-   │  저장소        │ ◄─────── │              │              │  뷰어 (APK)   │
-   │  (private)    │  기록     └──────────────┘              └──────────────┘
-   └──────────────┘                                                ▲
-          └─────────────────────────────────────────────────────────┘
+   ┌──────────────┐   MCP    ┌──────────────┐
+   │  당신의 학습   │ ───────► │    Claude    │
+   │  저장소        │ ◄─────── │              │
+   │  (private)    │  기록     └──────────────┘
+   └───────┬──────┘
+           │ .swea/  (조각 + 해시 인덱스)
+           ▼
+   ┌──────────────┐
+   │  안드로이드    │   첫 실행에 git 주소 하나.
+   │  뷰어 (APK)   │   재시작하면 캐시로 즉시 뜨고, 바뀐 조각만 받는다.
+   └──────────────┘
 ```
 
 ---
@@ -21,16 +26,19 @@ Claude가 당신의 학습 저장소를 직접 읽고 씁니다 — 다음에 �
 **문제 본문도, 문제 번호도, 풀이 코드도 여기에 없습니다.** 전부 *당신의* private 저장소에만 있습니다.
 
 많은 알고리즘 학습 플랫폼이 문제와 풀이의 공개·공유를 약관으로 금지합니다.
-그래서 sweaConnector는 의도적으로 **빈 그릇**입니다 — 도구·규약·일반 CS 개념 설명만 담고,
-내용은 빌드할 때 당신의 저장소에서 주입됩니다. `fixtures/` 의 예제 문제는 전부 가상입니다.
+그래서 sweaConnector는 의도적으로 **빈 그릇**입니다 — 도구·규약·일반 CS 개념 설명만 담습니다.
+`fixtures/` 의 예제 문제는 전부 가상입니다.
+
+**APK 도 빈 그릇입니다.** 콘텐츠는 빌드가 아니라 실행 중에 당신의 저장소에서 옵니다.
+그래서 APK 하나를 누구에게 줘도 자기 풀이가 딸려 가지 않고, 받는 사람은 자기 git 주소만 넣으면 됩니다.
 
 ## 구성
 
 | 디렉터리 | 역할 |
 |---|---|
 | `schema/` | 학습 저장소 규약 — [STUDY_REPO.md](schema/STUDY_REPO.md) |
-| `pipeline/` | 학습 저장소 → `content.json` → 앱 리소스 |
-| `mcp/` | MCP 서버 — Claude가 저장소를 읽고 기록하는 창구 |
+| `mcp/` | MCP 서버 — Claude가 저장소를 읽고 쓰는 창구 |
+| `pipeline/` | 학습 저장소 → `.swea/` (앱이 받아 가는 조각들) |
 | `app/` | 안드로이드 뷰어 (Kotlin · Compose) |
 | `content/` | 개념 사전 + SVG 도식 (일반 CS 지식) |
 | `fixtures/` | 가상 학습 저장소 (테스트용) |
@@ -41,31 +49,52 @@ Claude가 당신의 학습 저장소를 직접 읽고 씁니다 — 다음에 �
 git clone https://github.com/rleaderjoon/sweaConnector
 cd sweaConnector
 npm install
-npm test                              # 13개 자체 검증 (MCP 핸드셰이크 포함)
+npm test                              # 28개 자체 검증 (MCP 핸드셰이크 포함)
 
-# 1. 내 저장소가 규약에 맞는지 확인
-node pipeline/extract.mjs --repo /path/to/my-study-repo --out content.json
-
-# 2. 일정 설정 — 내 학습 저장소 루트에 .sweaconnector.json
-echo '{"startDate":"2026-08-15","examDate":"2026-09-19"}' > /path/to/my-study-repo/.sweaconnector.json
-
-# 3. Claude 에 붙이기
-claude mcp add swea -- node ./mcp/index.mjs --repo /path/to/my-study-repo
-
-# 4. 내 APK 굽기 — 콘텐츠 추출부터 서명까지 한 번에
-bash pipeline/build-apk.sh /path/to/my-study-repo release
+# Claude 에 붙이기 — 경로 인자 없이 붙인다
+claude mcp add swea -- node ./mcp/index.mjs
 ```
 
-APK 는 `app/reader/build/outputs/apk/release/` 에 나옵니다. GitHub Actions 에 맡기려면
-`.github/workflows/apk.yml` 을 수동 실행하세요 (공개 저장소이므로 데모 콘텐츠로 굽습니다).
+그다음 Claude 에게 말하면 됩니다:
 
-### 폰에 설치하기
+> "내 학습 저장소 https://github.com/나/내저장소.git 붙여 줘"
 
-1. APK 를 자기 private 저장소의 Release 에 올린다 — `gh release create v0.1.0 <apk> -R <owner>/<repo>`
-2. 폰 브라우저에서 그 Release 를 열어 APK 를 내려받는다 (GitHub 로그인 상태여야 한다)
-3. "출처를 알 수 없는 앱" 설치를 브라우저에 한 번 허용한다
+`setup_repo` 가 저장소를 받아 규약대로 뼈대를 만들고, **붙인 곳을 기억합니다** — 다음부터는 그냥 씁니다.
+아직 저장소가 없으면 GitHub 에서 빈 저장소 하나만 만들어 주소를 주면 됩니다.
 
-공개 저장소에 자기 APK 를 올리지 마세요 — APK 안에 문제와 풀이가 들어 있습니다.
+이후의 대화는 전부 도구로 연결됩니다:
+
+> "이번 주 뭐부터 풀까" → `next_problem`
+> "다익스트라 연습 문제 하나 만들어 줘" → `scaffold_problem` + `save_solution`
+> "방금 거 40분 걸려서 풀었어" → `record_progress`
+> "내가 어디서 자꾸 무너지지?" → `weak_points`
+> "폰에서 볼 수 있게 올려 줘" → `publish_content` (`.swea/` 갱신 + 커밋 + push)
+
+## 폰에 넣기
+
+```bash
+bash pipeline/build-apk.sh release     # 또는 Actions 의 apk 워크플로 수동 실행
+```
+
+APK 는 `app/reader/build/outputs/apk/release/` 에 나옵니다. 폰에 설치하고 첫 화면에서
+
+1. **git 주소** — `https://github.com/나/내저장소.git` (자체 호스팅 GitLab 도 됩니다)
+2. **브랜치** — 보통 `main`
+3. **접근 토큰** — 저장소가 private 이면 필요.
+   GitHub 은 Fine-grained token 의 `Contents: Read`, GitLab 은 `read_repository` 로 충분합니다.
+   토큰은 기기 키스토어 키로 감싸 저장합니다.
+
+APK 에 콘텐츠가 없으므로 공개된 곳에 올려도 됩니다. **토큰은 절대 어디에도 적어 두지 마세요.**
+
+### 두 번째 실행부터
+
+앱은 **로컬 사본으로 먼저 그리고 나서** 저장소를 봅니다.
+
+1. 캐시에 있는 `index.json` 하나를 읽어 목록을 띄운다 — 네트워크를 기다리는 구간이 없다
+2. 화면이 뜬 뒤 원격 `index.json` 을 받아 조각 해시를 견준다
+3. **해시가 다른 조각만** 내려받는다. 진도만 바뀐 날은 본문이 한 조각도 오가지 않는다
+
+오른쪽 위 작은 글씨가 그 결과입니다 — `갱신 중` / `3개 갱신` / `연결 실패`. 누르면 설정으로 갑니다.
 
 ### 화면
 
@@ -81,26 +110,37 @@ APK 는 `app/reader/build/outputs/apk/release/` 에 나옵니다. GitHub Actions
 
 | 툴 | 하는 일 |
 |---|---|
+| `setup_repo` | git 주소로 저장소를 붙이고, 없으면 규약대로 뼈대를 만든다 |
 | `list_problems` | 문제 목록 — status / week / type / topic / query 로 걸러서 |
 | `get_problem` | 문제 하나의 노트 전문 + 풀이 코드 |
+| `scaffold_problem` | 규약대로 문제 폴더 생성 (NOTES.md 뼈대 + 풀이 골격) |
+| `save_solution` | 문제 폴더에 풀이 파일 쓰기 |
 | `record_progress` | NOTES.md 프론트매터에 상태·시도횟수·소요시간 기록 (본문 불변) |
 | `append_note` | 특정 섹션 끝에 내용 덧붙이기 |
 | `schedule_status` | 계획 대비 실제 + 남은 문제 재배치안 |
+| `weak_points` | 반복되는 실패 원인 · 유형별 미해결률과 평균 시도 |
+| `next_problem` | 다음에 풀 문제 + 고른 이유 |
+| `publish_content` | `.swea/` 갱신 (+ 커밋, 선택적으로 push) |
 
 `schedule_status` 는 계획서를 읽어 주는 도구가 아니라 **계획이 이미 어긋났다는 전제로 고쳐 주는 도구**입니다.
 `slackDays` 를 먼저 보세요 — 응시일까지 남은 여유 일수이고, 음수면 페이스를 올려야 합니다.
 
+`weak_points` 는 상태만 세지 않습니다. **풀긴 풀었는데 매번 세 번씩 걸리는 유형**이 진짜 약점이므로,
+체크된 "실패 원인"과 유형별 평균 시도 횟수를 함께 봅니다.
+
 ## 요구 사항
 
-- Node 20+
-- JDK 17+ · Android SDK (platform 35) — 로컬 빌드할 때만. Actions 로 빌드하면 불필요.
+- Node 20+ · git
+- JDK 17+ · Android SDK (platform 35) — APK 를 직접 구울 때만. Actions 로 구우면 불필요.
 
 ## 설계 원칙
 
 - **읽기 전용 뷰어.** 앱에서 편집하지 않습니다. 쓰기는 Claude(MCP)를 통해 저장소로 갑니다.
-- **런타임 네트워크 없음.** 콘텐츠는 빌드 시점에 APK에 구워집니다. 눌렀을 때 파싱할 것이 없어야 즉시 뜹니다.
+- **캐시 먼저, 그다음 네트워크.** 시작할 때 기다리는 구간이 없어야 합니다. 갱신은 화면이 뜬 뒤에 조용히.
+- **바뀐 것만 오간다.** 메타는 인덱스에, 본문은 해시가 붙은 조각에. 진도만 바뀌면 본문은 받지 않습니다.
+- **앱에 파서 없음.** 마크다운도 SVG 도 파이프라인이 미리 블록·도형으로 바꿉니다. 눌렀을 때 파싱할 것이 없어야 즉시 뜹니다.
 - **폴더블 우선.** 접으면 한 페이지, 펼치면 펼친 면. 세로·가로 모두.
-- **도식은 벡터.** 알고리즘 도식은 손으로 쓴 SVG → VectorDrawable. AI 생성 이미지는 그럴싸하게 틀립니다.
+- **도식은 벡터.** 알고리즘 도식은 손으로 쓴 SVG → Compose Canvas. AI 생성 이미지는 그럴싸하게 틀립니다.
 
 ## 라이선스
 

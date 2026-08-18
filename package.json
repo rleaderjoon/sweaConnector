@@ -1,17 +1,16 @@
 {
   "name": "swea-connector",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
-  "description": "자기 알고리즘 학습 저장소를 Claude에 연결하고 읽기 전용 안드로이드 뷰어로 굽는 도구",
+  "description": "자기 알고리즘 학습 저장소를 Claude(MCP)에 연결하고, 그 저장소를 그대로 읽는 안드로이드 뷰어",
   "license": "MIT",
   "engines": {
     "node": ">=20"
   },
   "scripts": {
     "test": "node mcp/selftest.mjs",
-    "extract": "node pipeline/extract.mjs",
-    "extract:fixtures": "node pipeline/extract.mjs --repo fixtures/sample-study-repo --out content.json",
+    "publish-content": "node pipeline/publish.mjs",
     "mcp": "node mcp/index.mjs"
   },
   "dependencies": {

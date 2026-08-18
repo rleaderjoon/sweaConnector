@@ -1,7 +1,7 @@
 # 학습 저장소 규약 (Study Repo Convention) — v1
 
-sweaConnector는 **당신의 학습 저장소를 읽기만** 합니다. 저장소는 당신 소유이고 private이어도 됩니다.
-이 문서는 sweaConnector가 무엇을 어떻게 읽는지에 대한 계약입니다.
+저장소는 당신 소유이고 private이어도 됩니다. 이 문서는 sweaConnector가 그 저장소를 어떻게 읽고 쓰는지에 대한 계약입니다.
+읽는 것은 `src/` 아래 전부, 쓰는 것은 NOTES.md 프론트매터·새 문제 폴더·`.swea/` 뿐입니다 — 본문은 건드리지 않습니다.
 
 > **중요**: sweaConnector 저장소(public)에는 문제 본문·문제 번호·풀이 코드를 넣지 않습니다.
 > 그런 내용은 전부 당신의 private 학습 저장소에만 존재합니다. 공개 저장소는 빈 그릇입니다.
@@ -12,7 +12,9 @@ sweaConnector는 **당신의 학습 저장소를 읽기만** 합니다. 저장�
 
 ```
 <your-study-repo>/
+├─ .sweaconnector.json        일정 — {"startDate": "...", "examDate": "..."}
 ├─ STUDY_PLAN.md              (선택) 일정 문서
+├─ .swea/                     생성물 — 앱이 읽는다 (6장, 커밋한다)
 └─ src/
    ├─ w1d1_1001_prefixsum/    문제 폴더
    │  ├─ NOTES.md             ← 기록의 원본
@@ -97,19 +99,50 @@ UserSolution.*  →  Main.*  →  Solution.*  →  그 외 소스 파일 중 가
 
 `bin/`, `*.class`, `.metadata/`, `.git/`, `node_modules/`, 점으로 시작하는 디렉터리.
 
-## 6. 출력
+## 6. 출력 — `.swea/`
 
-파이프라인은 위를 읽어 `content.json` 하나로 만듭니다. 앱은 이 JSON만 봅니다.
+파이프라인(`publish_content` 툴 또는 `node pipeline/publish.mjs`)은 위를 읽어 저장소 안에 `.swea/` 를 만듭니다.
+**이 디렉터리는 커밋합니다.** 앱이 내려받는 것이 이것이고, 원격에 없으면 폰에서 보이지 않습니다.
+
+```
+<your-study-repo>/.swea/
+├─ index.json                 목록·메타·해시 전부 (수십 KB)
+├─ problems/<key>.json        문제 하나의 본문 + 풀이 코드
+├─ concepts/<id>.json         개념 하나의 본문
+└─ diagrams.json              도식 전체
+```
 
 ```json
+// index.json
 {
+  "formatVersion": 1,
   "generatedAt": "...",
-  "weeks":    [{ "week": 1, "problems": ["w1d1_1001_prefixsum", "..."] }],
-  "problems": [{ "key": "w1d1_1001_prefixsum", "week": 1, "day": 1, "problemId": 1001,
-                 "title": "구간 합 빠르게 구하기", "type": "basic", "status": "solved",
-                 "topic": ["누적합"], "difficulty": "D2",
-                 "sections": { "접근 힌트": "..." },
-                 "solution": { "file": "Main.java", "lang": "java", "code": "..." } }],
-  "concepts": [{ "id": "union-find", "title": "Union-Find", "body": "...", "diagram": "union-find-compress" }]
+  "config":   { "startDate": "...", "examDate": "..." },
+  "weeks":    [{ "week": 1, "problems": ["w1d1_1001_prefixsum"] }],
+  "problems": [{ "key": "w1d1_1001_prefixsum", "week": 1, "day": 1, "title": "구간 합 빠르게 구하기",
+                 "type": "basic", "status": "solved", "topic": ["누적합"], "difficulty": "D2",
+                 "hash": "9ff141b67dd21307" }],
+  "concepts": [{ "id": "union-find", "title": "Union-Find", "hash": "4e96..." }],
+  "diagramsHash": "21e9..."
 }
+
+// problems/w1d1_1001_prefixsum.json
+{ "key": "...", "sections": [{ "name": "접근 힌트", "blocks": [...] }],
+  "solution": { "file": "Main.java", "lang": "java", "code": "..." } }
 ```
+
+### 왜 이렇게 나누는가
+
+- **메타는 인덱스에만.** 목록 화면은 `index.json` 하나로 완성됩니다 — 앱이 시작할 때 본문 조각을 한 개도 읽지 않습니다.
+- **본문은 조각마다 해시.** 앱은 재시작할 때 인덱스만 받아 해시를 견주고, **다른 조각만** 내려받습니다.
+  진도(`status`, `attempts`)만 바뀐 날은 본문이 한 조각도 오가지 않습니다.
+- **같으면 다시 쓰지 않습니다.** 두 번 publish 해도 커밋할 것이 생기지 않습니다.
+
+### 앱과의 계약
+
+| 상황 | 앱의 반응 |
+|---|---|
+| `.swea/` 가 없다 | "찾을 수 없습니다" — publish 를 먼저 돌리라고 안내 |
+| `formatVersion` 이 앱과 다르다 | 갱신을 멈추고 그대로 알림 (로컬 사본은 유지) |
+| 저장소가 private | 접근 토큰 필요 (GitHub `Contents: Read` / GitLab `read_repository`) |
+| 조각을 받다 끊김 | 인덱스를 마지막에 쓰므로, 다음 실행이 같은 자리에서 이어받음 |

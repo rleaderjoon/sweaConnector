@@ -5,11 +5,11 @@
 import { execFileSync } from 'node:child_process'
 import { readFile } from 'node:fs/promises'
 
-const ALLOWED_IDS = new Set(['1001', '2001']) // fixtures 의 가상 문제
+const ALLOWED_IDS = new Set(['1001', '2001', '3001', '3002']) // fixtures 와 자체 검증이 만드는 가상 문제
 const KEY_RE = /w\d+d\d+_(\d+)_/g
 
 // 파일 자체가 추적되면 안 되는 것들. .gitignore 의 경로가 어긋나도 여기서 잡힌다.
-const FORBIDDEN = [/(^|\/)content\.json$/, /\.(apk|aab|keystore)$/]
+const FORBIDDEN = [/(^|\/)content\.json$/, /(^|\/)\.swea\//, /\.(apk|aab|keystore)$/]
 
 const tracked = execFileSync('git', ['ls-files'], { encoding: 'utf8' }).trim().split('\n')
 const leaks = []
